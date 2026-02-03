@@ -32,7 +32,6 @@ import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   signInAnonymously, 
-  signInWithCustomToken, 
   onAuthStateChanged 
 } from 'firebase/auth';
 import { 
@@ -59,8 +58,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-// Use a fallback ID if not running in the specific preview environment
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'lumina-public';
+// Fixed App ID for production to avoid linting errors
+const appId = 'lumina-public';
 
 // --- Constants ---
 
@@ -155,8 +154,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // NOTE: In a real production app, this should be replaced with 
-    // firebase.auth().signInWithEmailAndPassword() for true security.
     if (password === 'lumina2024') {
       onLogin();
       onClose();
@@ -863,11 +860,7 @@ export default function App() {
   useEffect(() => {
     // 1. Initialize Auth
     const initAuth = async () => {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
+      await signInAnonymously(auth);
     };
     initAuth();
 
@@ -942,7 +935,7 @@ export default function App() {
 
   const handleDeleteEvent = async (id) => {
     if (!user) return;
-    if (!confirm("Are you sure you want to remove this event?")) return;
+    if (!window.confirm("Are you sure you want to remove this event?")) return;
     
     setIsDeletingId(id);
     try {

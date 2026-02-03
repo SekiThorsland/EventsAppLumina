@@ -8,11 +8,9 @@ import {
   Palette, 
   Trophy, 
   ArrowRight, 
-  Search,
   Menu,
   X,
   Sparkles,
-  ChevronRight,
   ArrowLeft,
   Mail,
   User,
@@ -25,8 +23,7 @@ import {
   Trash2,
   Settings,
   Lock,
-  Loader2,
-  Database
+  Loader2
 } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { 
@@ -58,8 +55,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-// Fixed App ID for production to avoid linting errors
-const appId = 'lumina-public';
 
 // --- Constants ---
 
@@ -876,8 +871,8 @@ export default function App() {
     // 3. Data Listener (Only runs when user is authenticated)
     if (!user) return;
 
-    const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
-    // NOTE: Simple query without orderBy to avoid index requirement errors in this env
+    // Simplified to root collection 'events'
+    const eventsRef = collection(db, 'events');
     const q = query(eventsRef);
 
     const unsubscribeData = onSnapshot(q, (snapshot) => {
@@ -893,6 +888,9 @@ export default function App() {
       setIsLoadingEvents(false);
     }, (error) => {
       console.error("Error fetching events:", error);
+      if (error.code === 'permission-denied') {
+        console.warn("Check your Firestore Security Rules. You might need to allow read/write access.");
+      }
       setIsLoadingEvents(false);
     });
 
@@ -922,7 +920,8 @@ export default function App() {
     if (!user) return;
     setIsSaving(true);
     try {
-      const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+      // Simplified to root collection 'events'
+      const eventsRef = collection(db, 'events');
       await addDoc(eventsRef, newEvent);
       setShowAddModal(false);
     } catch (error) {
@@ -939,8 +938,8 @@ export default function App() {
     
     setIsDeletingId(id);
     try {
-      // In Firestore, the ID we get from snapshot map is the doc ID
-      const eventDoc = doc(db, 'artifacts', appId, 'public', 'data', 'events', id);
+      // Simplified to root collection 'events'
+      const eventDoc = doc(db, 'events', id);
       await deleteDoc(eventDoc);
     } catch (error) {
       console.error("Error deleting event:", error);
@@ -961,7 +960,8 @@ export default function App() {
   // Seed Data function (Optional - for first time run if needed, but not exposed in UI)
   const seedData = async () => {
     if (events.length === 0 && !isLoadingEvents && user) {
-      const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+      // Simplified to root collection 'events'
+      const eventsRef = collection(db, 'events');
       for (const ev of INITIAL_EVENTS) {
         await addDoc(eventsRef, ev);
       }

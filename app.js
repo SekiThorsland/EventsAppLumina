@@ -46,11 +46,21 @@ import {
 } from 'firebase/firestore';
 
 // --- Firebase Configuration & Initialization ---
-const firebaseConfig = JSON.parse(__firebase_config);
+const firebaseConfig = {
+  apiKey: "AIzaSyCKzwU2mU9BIP0SZqRtXRkTzwLN5uUTLJw",
+  authDomain: "eventslumina.firebaseapp.com",
+  projectId: "eventslumina",
+  storageBucket: "eventslumina.firebasestorage.app",
+  messagingSenderId: "703320205451",
+  appId: "1:703320205451:web:df78470c6b5bf00f9dcc8e",
+  measurementId: "G-GFB53TGP3F"
+};
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// Use a fallback ID if not running in the specific preview environment
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'lumina-public';
 
 // --- Constants ---
 
@@ -476,20 +486,49 @@ const EventCard = ({ event, onClick, isAdmin, onDelete, isDeleting }) => {
       onClick={() => onClick(event)}
       className="group relative bg-slate-900/50 border border-white/10 rounded-3xl overflow-hidden hover:border-fuchsia-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(192,38,211,0.15)] h-full flex flex-col cursor-pointer transform hover:-translate-y-2"
     >
-      {/* Image Container code... */}
+      {/* Image Container */}
+      <div className="aspect-[4/3] overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-80" />
+        <img 
+          src={event.image} 
+          alt={event.title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1"
+        />
+        <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 group-hover:border-fuchsia-500/30 transition-colors">
+          <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
+            {event.category}
+          </span>
+        </div>
+        {event.featured && (
+           <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 rounded-full shadow-lg">
+             <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1">
+               <Sparkles className="w-3 h-3" /> Featured
+             </span>
+           </div>
+        )}
+      </div>
 
-      {/* Content Section */}
+      {/* Content */}
       <div className="p-8 relative z-20 -mt-20 flex flex-col flex-grow">
-        
-        {/* Date, Title, and Location Header code... */}
+        <div className="flex gap-4 mb-6">
+          <div className="flex flex-col items-center bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-3 min-w-[70px] text-center group-hover:bg-fuchsia-900/20 group-hover:border-fuchsia-500/30 transition-all">
+            <span className="text-xs text-fuchsia-400 font-bold uppercase mb-1">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
+            <span className="text-2xl font-black text-white">{new Date(event.date).getDate()}</span>
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-2 leading-tight group-hover:text-fuchsia-300 transition-colors">{event.title}</h3>
+            <div className="flex items-center gap-2 text-slate-400 text-sm group-hover:text-slate-300">
+              <MapPin className="w-4 h-4 text-fuchsia-500" />
+              {event.location}
+            </div>
+          </div>
+        </div>
 
-        {/* Description Text */}
-        {/* 'flex-grow' ensures this text creates the space you see */}
         <p className="text-slate-400 text-sm leading-relaxed flex-grow border-l-2 border-white/10 pl-4 group-hover:border-fuchsia-500/50 transition-colors">
           {event.description}
         </p>
 
-        {/* Delete Button (Hidden for public users, visible in Creator Mode) */}
+        {/* Delete Button (Only visible in admin mode) */}
         {isAdmin && (
           <div className="mt-6 pt-4 border-t border-white/5 flex justify-end">
             <button 

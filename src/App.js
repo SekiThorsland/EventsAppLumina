@@ -14,15 +14,10 @@ import {
   ArrowLeft,
   Mail,
   User,
-  MessageSquare,
   Send,
   Clock,
   Zap,
   Flame,
-  Plus,
-  Trash2,
-  Settings,
-  Lock,
   Loader2
 } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
@@ -34,9 +29,6 @@ import {
 import { 
   getFirestore, 
   collection, 
-  addDoc, 
-  deleteDoc, 
-  doc, 
   onSnapshot,
   query
 } from 'firebase/firestore';
@@ -64,42 +56,6 @@ const CATEGORIES = [
   { id: 'tech', label: 'Tech', icon: Code },
   { id: 'art', label: 'Art', icon: Palette },
   { id: 'sports', label: 'Action', icon: Trophy },
-];
-
-const INITIAL_EVENTS = [
-  {
-    title: "Neon Horizon Festival",
-    date: "2024-08-15",
-    time: "18:00",
-    location: "Cyber City Arena, Tokyo",
-    price: "$120",
-    category: "music",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop",
-    description: "Experience the future of sound with the world's top electronic artists in an immersive neon landscape."
-  },
-  {
-    title: "Future AI Summit",
-    date: "2024-09-22",
-    time: "09:00",
-    location: "Moscone Center, SF",
-    price: "$499",
-    category: "tech",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop",
-    description: "Join industry leaders to discuss the next generation of artificial intelligence."
-  },
-  {
-    title: "Abstract Realities",
-    date: "2024-10-05",
-    time: "10:00",
-    location: "Modern Art Museum, NYC",
-    price: "$35",
-    category: "art",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=2070&auto=format&fit=crop",
-    description: "A breathtaking exhibition challenging perception through digital and physical mixed media."
-  }
 ];
 
 // --- Components ---
@@ -141,196 +97,7 @@ const ScrollReveal = ({ children, className = '', delay = 0 }) => {
   );
 };
 
-const LoginModal = ({ isOpen, onClose, onLogin }) => {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password === 'lumina2024') {
-      onLogin();
-      onClose();
-      setPassword('');
-      setError(false);
-    } else {
-      setError(true);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
-      <div className="relative bg-slate-900 border border-white/10 rounded-2xl w-full max-w-sm p-8 shadow-2xl animate-fade-in-up">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-          <X className="w-5 h-5" />
-        </button>
-        
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 border border-white/10">
-            <Lock className="w-6 h-6 text-fuchsia-400" />
-          </div>
-          <h3 className="text-xl font-bold text-white">Creator Access</h3>
-          <p className="text-slate-400 text-sm mt-1">Enter password to manage events</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(false);
-              }}
-              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-center text-white focus:outline-none focus:border-fuchsia-500 transition-colors"
-              placeholder="Enter Password"
-              autoFocus
-            />
-            {error && <p className="text-red-400 text-xs text-center mt-2">Incorrect password</p>}
-          </div>
-
-          <button className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold hover:shadow-lg hover:scale-[1.02] transition-all">
-            Unlock
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const AddEventModal = ({ isOpen, onClose, onAdd, isSaving }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'music',
-    date: '',
-    time: '',
-    location: '',
-    description: '',
-    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1000'
-  });
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onAdd({
-      ...formData,
-      price: 'Free',
-      featured: false
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg p-8 shadow-2xl animate-fade-in-up max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-white">Create New Event</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Event Title</label>
-            <input 
-              required
-              type="text" 
-              value={formData.title}
-              onChange={e => setFormData({...formData, title: e.target.value})}
-              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500"
-              placeholder="e.g. Midnight Jazz"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Category</label>
-              <select 
-                value={formData.category}
-                onChange={e => setFormData({...formData, category: e.target.value})}
-                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500 appearance-none"
-              >
-                {CATEGORIES.slice(1).map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Date</label>
-              <input 
-                required
-                type="date"
-                value={formData.date}
-                onChange={e => setFormData({...formData, date: e.target.value})}
-                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Time</label>
-              <input 
-                required
-                type="time" 
-                value={formData.time}
-                onChange={e => setFormData({...formData, time: e.target.value})}
-                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Location</label>
-              <input 
-                required
-                type="text" 
-                value={formData.location}
-                onChange={e => setFormData({...formData, location: e.target.value})}
-                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500"
-                placeholder="City, Venue"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Image URL</label>
-            <input 
-              type="text" 
-              value={formData.image}
-              onChange={e => setFormData({...formData, image: e.target.value})}
-              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500"
-              placeholder="https://..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Description</label>
-            <textarea 
-              rows="3"
-              required
-              value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}
-              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-fuchsia-500 resize-none"
-              placeholder="What's the vibe?"
-            />
-          </div>
-
-          <button 
-            disabled={isSaving}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-lg hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : 'Launch Event'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const Navbar = ({ isScrolled, currentPage, onNavigate, isAdmin, onToggleAdmin, onAddEvent }) => {
+const Navbar = ({ isScrolled, currentPage, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinkClass = (page) => `cursor-pointer transition-all duration-300 ${currentPage === page ? 'text-white font-bold drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-300 hover:text-white hover:drop-shadow-[0_0_5px_rgba(167,139,250,0.8)]'}`;
@@ -348,8 +115,8 @@ const Navbar = ({ isScrolled, currentPage, onNavigate, isAdmin, onToggleAdmin, o
               <Zap className="text-fuchsia-400 w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
             </div>
           </div>
-          <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-fuchsia-200 to-indigo-400 tracking-tight">
-            LUMINA
+          <span className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-fuchsia-200 to-indigo-400 tracking-tight">
+            EVENTS IN SERBIA
           </span>
         </div>
 
@@ -358,25 +125,6 @@ const Navbar = ({ isScrolled, currentPage, onNavigate, isAdmin, onToggleAdmin, o
           <span onClick={() => onNavigate('home')} className={navLinkClass('home')}>Home</span>
           <span onClick={() => onNavigate('events')} className={navLinkClass('events')}>Events</span>
           <span onClick={() => onNavigate('contact')} className={navLinkClass('contact')}>Contact</span>
-          
-          <div className="h-6 w-px bg-white/10 mx-2"></div>
-
-          <button 
-            onClick={onToggleAdmin}
-            className={`flex items-center gap-2 transition-colors ${isAdmin ? 'text-fuchsia-400' : 'text-slate-400 hover:text-white'}`}
-          >
-            {isAdmin ? <Settings className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            <span>{isAdmin ? 'Creator Mode On' : 'Creator Login'}</span>
-          </button>
-
-          {isAdmin && (
-            <button 
-              onClick={onAddEvent}
-              className="p-2 rounded-full bg-fuchsia-600 text-white hover:bg-fuchsia-500 transition-all shadow-[0_0_15px_rgba(192,38,211,0.5)]"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -394,29 +142,6 @@ const Navbar = ({ isScrolled, currentPage, onNavigate, isAdmin, onToggleAdmin, o
           <span onClick={() => {onNavigate('home'); setIsOpen(false)}} className="text-white text-lg font-bold hover:text-fuchsia-400 py-2 cursor-pointer border-b border-white/5">Home</span>
           <span onClick={() => {onNavigate('events'); setIsOpen(false)}} className="text-white text-lg font-bold hover:text-fuchsia-400 py-2 cursor-pointer border-b border-white/5">Events</span>
           <span onClick={() => {onNavigate('contact'); setIsOpen(false)}} className="text-white text-lg font-bold hover:text-fuchsia-400 py-2 cursor-pointer border-b border-white/5">Contact</span>
-          
-          <button 
-            onClick={() => {
-              onToggleAdmin();
-              setIsOpen(false);
-            }}
-            className="text-left text-slate-400 py-2 flex items-center gap-2"
-          >
-            {isAdmin ? <Settings className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            {isAdmin ? 'Disable Creator Mode' : 'Creator Login'}
-          </button>
-
-          {isAdmin && (
-            <button 
-              onClick={() => {
-                onAddEvent();
-                setIsOpen(false);
-              }}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg flex items-center justify-center gap-2"
-            >
-              <Plus className="w-5 h-5" /> Add New Event
-            </button>
-          )}
         </div>
       )}
     </nav>
@@ -449,7 +174,7 @@ const Hero = ({ onNavigate }) => {
         </h1>
         
         <p className="text-slate-300 text-xl md:text-2xl max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up delay-200 font-light">
-          Don't just watch. <span className="text-white font-bold">Experience.</span> Access the world's most exclusive festivals, underground summits, and avant-garde exhibitions.
+          Don't just watch. <span className="text-white font-bold">Experience.</span> Access the most exclusive festivals, underground summits, and avant-garde exhibitions in Serbia.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up delay-300 w-full max-w-lg mx-auto">
@@ -472,7 +197,7 @@ const Hero = ({ onNavigate }) => {
   );
 };
 
-const EventCard = ({ event, onClick, isAdmin, onDelete, isDeleting }) => {
+const EventCard = ({ event, onClick }) => {
   return (
     <div 
       onClick={() => onClick(event)}
@@ -519,23 +244,6 @@ const EventCard = ({ event, onClick, isAdmin, onDelete, isDeleting }) => {
         <p className="text-slate-400 text-sm leading-relaxed flex-grow border-l-2 border-white/10 pl-4 group-hover:border-fuchsia-500/50 transition-colors">
           {event.description}
         </p>
-
-        {/* Delete Button (Only visible in admin mode) */}
-        {isAdmin && (
-          <div className="mt-6 pt-4 border-t border-white/5 flex justify-end">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(event.id);
-              }}
-              disabled={isDeleting}
-              className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-bold bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
-            >
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              {isDeleting ? 'Removing...' : 'Remove Event'}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -637,7 +345,7 @@ const EventDetailPage = ({ event, onBack }) => {
                    <User className="w-5 h-5 text-slate-500 mt-1" />
                    <div>
                      <p className="text-slate-400 text-sm font-bold uppercase">Organizer</p>
-                     <p className="text-white font-medium">Lumina Originals</p>
+                     <p className="text-white font-medium">Events in Serbia</p>
                    </div>
                  </div>
                  <div className="flex items-start gap-4">
@@ -698,7 +406,7 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <p className="text-sm text-slate-500 font-bold uppercase mb-1">Email Us</p>
-                    <p className="text-xl font-bold text-white group-hover:text-fuchsia-300 transition-colors">hello@lumina.events</p>
+                    <p className="text-xl font-bold text-white group-hover:text-fuchsia-300 transition-colors">hello@eventsinserbia.rs</p>
                   </div>
                 </div>
                 <div className="group flex items-center gap-6 text-slate-300 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
@@ -777,7 +485,7 @@ const Footer = ({ onNavigate }) => {
                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center group-hover:bg-fuchsia-400 transition-colors duration-300">
                 <Zap className="text-black w-6 h-6" />
               </div>
-              <span className="text-3xl font-black text-white tracking-tighter">LUMINA</span>
+              <span className="text-3xl font-black text-white tracking-tighter">EVENTS IN SERBIA</span>
             </div>
             <p className="text-slate-400 text-lg max-w-md leading-relaxed mb-8">
               We don't just host events. We curate moments that define a generation. Join the movement.
@@ -821,7 +529,7 @@ const Footer = ({ onNavigate }) => {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-600 text-sm">© 2024 Lumina Events Inc. All rights reserved.</p>
+          <p className="text-slate-600 text-sm">© 2024 Events in Serbia. All rights reserved.</p>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
             <span className="text-slate-500 text-sm">Systems Operational</span>
@@ -841,13 +549,6 @@ export default function App() {
   // Data State
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeletingId, setIsDeletingId] = useState(null);
-
-  // Admin State
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(null);
 
   // --- Auth & Data Effects ---
@@ -916,58 +617,6 @@ export default function App() {
     setCurrentPage(page);
   };
 
-  const handleAddEvent = async (newEvent) => {
-    if (!user) return;
-    setIsSaving(true);
-    try {
-      // Simplified to root collection 'events'
-      const eventsRef = collection(db, 'events');
-      await addDoc(eventsRef, newEvent);
-      setShowAddModal(false);
-    } catch (error) {
-      console.error("Error adding event:", error);
-      alert("Failed to add event. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDeleteEvent = async (id) => {
-    if (!user) return;
-    if (!window.confirm("Are you sure you want to remove this event?")) return;
-    
-    setIsDeletingId(id);
-    try {
-      // Simplified to root collection 'events'
-      const eventDoc = doc(db, 'events', id);
-      await deleteDoc(eventDoc);
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Failed to delete event.");
-    } finally {
-      setIsDeletingId(null);
-    }
-  };
-
-  const handleAdminToggle = () => {
-    if (isAdmin) {
-      setIsAdmin(false);
-    } else {
-      setShowLoginModal(true);
-    }
-  };
-
-  // Seed Data function (Optional - for first time run if needed, but not exposed in UI)
-  const seedData = async () => {
-    if (events.length === 0 && !isLoadingEvents && user) {
-      // Simplified to root collection 'events'
-      const eventsRef = collection(db, 'events');
-      for (const ev of INITIAL_EVENTS) {
-        await addDoc(eventsRef, ev);
-      }
-    }
-  };
-
   const filteredEvents = selectedCategory === 'all' 
     ? events 
     : events.filter(event => event.category === selectedCategory);
@@ -1008,16 +657,12 @@ export default function App() {
                        <EventCard 
                           event={event} 
                           onClick={(e) => handleNavigate('event-detail', e)} 
-                          isAdmin={isAdmin}
-                          onDelete={handleDeleteEvent}
-                          isDeleting={isDeletingId === event.id}
                        />
                     </ScrollReveal>
                   ))}
                   {events.length === 0 && (
                      <div className="col-span-full text-center py-10">
-                       <p className="text-slate-500">No events yet. {isAdmin ? 'Add one!' : 'Check back soon.'}</p>
-                       {isAdmin && <button onClick={seedData} className="mt-4 text-xs text-slate-700 hover:text-white">Load Demo Data</button>}
+                       <p className="text-slate-500">No events yet. Check back soon.</p>
                      </div>
                   )}
                 </div>
@@ -1083,9 +728,6 @@ export default function App() {
                     <EventCard 
                       event={event} 
                       onClick={(e) => handleNavigate('event-detail', e)} 
-                      isAdmin={isAdmin}
-                      onDelete={handleDeleteEvent}
-                      isDeleting={isDeletingId === event.id}
                     />
                   </ScrollReveal>
                 ))}
@@ -1129,9 +771,6 @@ export default function App() {
         isScrolled={isScrolled} 
         currentPage={currentPage} 
         onNavigate={handleNavigate}
-        isAdmin={isAdmin}
-        onToggleAdmin={handleAdminToggle}
-        onAddEvent={() => setShowAddModal(true)}
       />
       
       <main>
@@ -1139,19 +778,6 @@ export default function App() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
-      
-      <AddEventModal 
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddEvent}
-        isSaving={isSaving}
-      />
-
-      <LoginModal 
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={() => setIsAdmin(true)}
-      />
       
       {/* Global Styles for Animations */}
       <style>{`

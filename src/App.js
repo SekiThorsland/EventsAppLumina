@@ -169,8 +169,8 @@ const Hero = ({ onNavigate }) => {
         </div>
         
         <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 leading-[0.9] tracking-tighter animate-fade-in-up delay-100 mix-blend-screen">
-          FILIP JE <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient-x">PEDER</span>
+          IGNITE YOUR <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient-x">SENSES</span>
         </h1>
         
         <p className="text-slate-300 text-xl md:text-2xl max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up delay-200 font-light">

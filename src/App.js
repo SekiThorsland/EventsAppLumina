@@ -101,44 +101,6 @@ const INITIAL_EVENTS = [
       { day: "Day 3 (Aug 17)", guests: ["Bajaga i Instruktori", "Neverne Bebe"] },
       { day: "Day 4 (Aug 18)", guests: ["Love Hunters", "Ortodox Celts"] }
     ]
-  },
-  {
-    title: "EXIT Festival",
-    date: "10-07-2024",
-    endDate: "14-07-2024",
-    time: "20:00",
-    location: "Petrovaradin Fortress",
-    city: "Novi Sad",
-    category: "music",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1533174072545-e8d4aa97edf9?q=80&w=2070&auto=format&fit=crop",
-    description: "Join music lovers from around the world at the award-winning summer music festival.",
-    highlights: ["Dance Arena", "Sunrise Views", "Camping Village"],
-    organizer: "Exit Foundation",
-    ageLimit: "16+",
-    entryPolicy: "Tickets from 120 EUR",
-    dressCode: "Festival Casual",
-    dailySchedule: [
-      { day: "Day 1", guests: ["The Prodigy", "Viagra Boys"] },
-      { day: "Day 2", guests: ["Skrillex", "Epica"] },
-      { day: "Day 3", guests: ["Alessesso", "Sofi Tukker"] },
-      { day: "Day 4", guests: ["Wu-Tang Clan", "Dimitri Vegas & Like Mike"] }
-    ]
-  },
-  {
-    title: "Belgrade Design Week",
-    date: "05-10-2024",
-    time: "10:00",
-    location: "Dorćol Platz",
-    city: "Belgrade",
-    category: "art",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=2070&auto=format&fit=crop",
-    description: "A showcase of cutting-edge design, innovation, and creative thinking in the heart of Belgrade.",
-    guests: ["Karim Rashid", "Bjarke Ingels"],
-    highlights: ["Interactive Workshops", "Pop-up Galleries"],
-    organizer: "BDW Collective",
-    entryPolicy: "Registration Needed"
   }
 ];
 
@@ -208,7 +170,7 @@ const shareEvent = async (event) => {
     document.body.removeChild(textArea);
     const toast = document.createElement('div');
     toast.innerText = 'Link copied to clipboard!';
-    toast.className = 'fixed bottom-8 left-1/2 -translate-x-1/2 bg-fuchsia-600 text-white px-6 py-3 rounded-full z-[100] shadow-2xl animate-fade-in-up font-bold';
+    toast.className = 'fixed bottom-8 left-1/2 -translate-x-1/2 bg-fuchsia-600 text-white px-6 py-3 rounded-full z-[100] shadow-2xl animate-fade-in-up font-bold text-sm';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
   }
@@ -369,15 +331,14 @@ const EventDetailPage = ({ event, onBack, isFavorite, onToggleFavorite, events =
   } else if (event.dailySchedule && typeof event.dailySchedule === 'object') {
       dailySchedule = Object.keys(event.dailySchedule).map(key => {
           const value = event.dailySchedule[key];
-          if (value.guests) return value; 
-          return { day: key, guests: value };
+          return value.guests ? value : { day: key, guests: value };
       });
       dailySchedule.sort((a, b) => a.day.localeCompare(b.day));
   }
   
   const highlights = ensureArray(event.highlights);
   const relatedEvents = events.filter(e => e.category === event.category && e.id !== event.id).slice(0, 3);
-
+  
   const dynamicDetails = [
     { key: 'organizer', label: 'Organizer', icon: User, default: 'Events in Serbia' },
     { key: 'ageLimit', label: 'Age Limit', icon: ShieldCheck },
@@ -392,29 +353,34 @@ const EventDetailPage = ({ event, onBack, isFavorite, onToggleFavorite, events =
             <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black z-10" />
             <img src={event.image} alt={event.title} className="w-full h-full object-cover animate-pulse-slow" style={{ animationDuration: '20s' }} />
         </div>
-        <div className="relative z-50 px-6 pt-28 flex justify-between container mx-auto">
-          <button onClick={onBack} className="group flex items-center gap-3 px-6 py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-fuchsia-600 border border-white/10 transition-all">
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
-            <span className="font-bold">Back to Vibes</span>
+        
+        <div className="relative z-50 px-4 md:px-6 pt-24 md:pt-28 flex justify-between items-center container mx-auto">
+          <button onClick={onBack} className="group flex items-center gap-1.5 md:gap-3 px-3 py-2 md:px-6 md:py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-fuchsia-600 border border-white/10 transition-all text-xs md:text-base">
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" /> 
+            <span className="hidden sm:inline font-bold">Back to Vibes</span>
+            <span className="sm:hidden font-bold">Back</span>
           </button>
-          <div className="flex gap-3">
-             <button onClick={() => shareEvent(event)} className="group flex items-center gap-2 px-6 py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-white/10 border border-white/10 transition-all">
-              <Share2 className="w-5 h-5" />
-              <span className="font-bold">Share</span>
+          
+          <div className="flex gap-2">
+             <button onClick={() => shareEvent(event)} className="group flex items-center gap-2 p-2.5 md:px-5 md:py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-white/10 border border-white/10 transition-all" title="Share">
+              <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="hidden lg:inline font-bold text-sm">Share</span>
             </button>
              <button onClick={() => {
                 const start = parseDate(event.date);
                 const isoDate = start.toISOString().replace(/-|:|\.\d\d\d/g, "");
                 window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${isoDate}/${isoDate}`, '_blank');
-             }} className="group hidden sm:flex items-center gap-2 px-6 py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-indigo-600 border border-white/10 transition-all">
-              <CalendarPlus className="w-5 h-5" /> <span className="font-bold">Add to Calendar</span>
+             }} className="group flex items-center gap-2 p-2.5 md:px-5 md:py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-indigo-600 border border-white/10 transition-all" title="Add to Calendar">
+              <CalendarPlus className="w-4 h-4 md:w-5 md:h-5" /> 
+              <span className="hidden lg:inline font-bold text-sm">Add to Calendar</span>
             </button>
-             <button onClick={(e) => onToggleFavorite(e, event.id)} className="group flex items-center gap-2 px-6 py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-white/10 border border-white/10 transition-all">
-              <Heart className={`w-5 h-5 transition-colors ${isFavorite ? 'fill-fuchsia-500 text-fuchsia-500' : 'text-white'}`} />
-              <span className="font-bold">{isFavorite ? 'Saved' : 'Save'}</span>
+             <button onClick={(e) => onToggleFavorite(e, event.id)} className="group flex items-center gap-2 p-2.5 md:px-5 md:py-3 bg-black/40 backdrop-blur-xl text-white rounded-full hover:bg-white/10 border border-white/10 transition-all" title="Save">
+              <Heart className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${isFavorite ? 'fill-fuchsia-500 text-fuchsia-500' : 'text-white'}`} />
+              <span className="hidden lg:inline font-bold text-sm">{isFavorite ? 'Saved' : 'Save'}</span>
             </button>
           </div>
         </div>
+
         <div className="relative z-20 pb-20 pt-32 bg-gradient-to-t from-black via-black/90 to-transparent mt-auto">
           <div className="container mx-auto px-6">
              <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -449,105 +415,69 @@ const EventDetailPage = ({ event, onBack, isFavorite, onToggleFavorite, events =
           <ScrollReveal>
              <h2 className="text-3xl font-black text-white mb-8 border-l-4 border-fuchsia-500 pl-6 uppercase tracking-tight">THE EXPERIENCE</h2>
              <div className="prose prose-invert prose-lg max-w-none">
-               <p className="text-slate-300 text-xl leading-relaxed mb-8 font-light">
-                 {event.description}
-               </p>
+               <p className="text-slate-300 text-xl leading-relaxed mb-8 font-light">{event.description}</p>
                
-               {/* Conditional Highlights */}
                {highlights.length > 0 && (
                 <div className="my-12 p-8 bg-gradient-to-r from-violet-900/20 to-fuchsia-900/20 rounded-3xl border border-white/5">
-                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase">
-                    <Zap className="w-6 h-6 text-yellow-400" /> Highlights
-                  </h3>
+                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase"><Zap className="w-6 h-6 text-yellow-400" /> Highlights</h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {highlights.map((h, i) => (
-                      <li key={i} className="flex items-start gap-4 text-slate-300">
-                        <div className="w-6 h-6 rounded-full bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                          <div className="w-2 h-2 rounded-full bg-fuchsia-500" />
-                        </div>
-                        <span>{h}</span>
-                      </li>
+                      <li key={i} className="flex items-start gap-4 text-slate-300"><div className="w-6 h-6 rounded-full bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0 mt-1"><div className="w-2 h-2 rounded-full bg-fuchsia-500" /></div><span>{h}</span></li>
                     ))}
                   </ul>
                 </div>
                )}
                
-               {/* Conditional Schedule */}
                {dailySchedule.length > 0 && (
                  <div className="my-12">
-                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase">
-                     <ListMusic className="w-6 h-6 text-fuchsia-400" /> Schedule
-                   </h3>
+                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase"><ListMusic className="w-6 h-6 text-fuchsia-400" /> Schedule</h3>
                    <div className="space-y-6">
                      {dailySchedule.map((d, idx) => (
                        <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6">
                          <h4 className="text-lg font-bold text-fuchsia-400 mb-3">{d.day || `Day ${idx + 1}`}</h4>
-                         <div className="flex flex-wrap gap-3">
-                            {Array.isArray(d.guests) && d.guests.map((g, gIdx) => (
-                              <span key={gIdx} className="text-slate-300 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
-                                {g}
-                              </span>
-                            ))}
-                         </div>
+                         <div className="flex flex-wrap gap-3">{ensureArray(d.guests).map((g, gIdx) => (<span key={gIdx} className="text-slate-300 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">{g}</span>))}</div>
                        </div>
                      ))}
                    </div>
                  </div>
                )}
 
-               {/* Conditional Lineup/Guests */}
                {guests.length > 0 && dailySchedule.length === 0 && (
                  <div className="my-12">
-                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase">
-                     <Mic2 className="w-6 h-6 text-fuchsia-400" /> {guestLabel}
-                   </h3>
-                   <div className="flex flex-wrap gap-4">
-                     {guests.map((g, idx) => (
-                       <span key={idx} className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-colors">
-                         {g}
-                       </span>
-                     ))}
-                   </div>
+                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 uppercase"><Mic2 className="w-6 h-6 text-fuchsia-400" /> {guestLabel}</h3>
+                   <div className="flex flex-wrap gap-4">{guests.map((g, idx) => (<span key={idx} className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-colors">{g}</span>))}</div>
                  </div>
                )}
              </div>
           </ScrollReveal>
         </div>
-
+        
         <div className="lg:col-span-4 space-y-8">
           <ScrollReveal delay={200}>
             <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-8 sticky top-32">
               <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">Event Details</h3>
               <div className="space-y-6">
-                 {/* Dynamic detail fields rendered only if present in DB */}
                  {dynamicDetails.map((field) => {
                    const value = event[field.key] || field.default;
                    if (!value) return null;
                    const Icon = field.icon;
-                   return (
-                    <div key={field.key} className="flex items-start gap-4">
-                      <Icon className="w-5 h-5 text-slate-500 mt-1" />
-                      <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{field.label}</p>
-                        <p className="text-white font-medium">{value}</p>
-                      </div>
-                    </div>
-                   );
+                   return (<div key={field.key} className="flex items-start gap-4"><Icon className="w-5 h-5 text-slate-500 mt-1" /><div><p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{field.label}</p><p className="text-white font-medium">{value}</p></div></div>);
                  })}
               </div>
+              
               <div className="mt-8 pt-8 border-t border-white/5">
-                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 text-center">Share this experience</p>
+                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 text-center">Ticket Status</p>
+                 <div className="flex justify-between items-center px-4 py-3 rounded-xl bg-white/5 border border-white/5 mb-4">
+                    <span className="text-slate-400 text-sm">Admission</span>
+                    <span className="text-white font-bold">{event.price || 'Contact'}</span>
+                 </div>
                  <div className="flex flex-col gap-3">
-                   <button onClick={() => shareEvent(event)} className="w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 border border-white/5">
-                    <Share2 className="w-4 h-4" /> Share Link
-                  </button>
+                   <button onClick={() => shareEvent(event)} className="w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 border border-white/5"><Share2 className="w-4 h-4" /> Share Experience</button>
                    <button onClick={() => {
                       const start = parseDate(event.date);
                       const isoDate = start.toISOString().replace(/-|:|\.\d\d\d/g, "");
                       window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${isoDate}/${isoDate}`, '_blank');
-                   }} className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
-                    <CalendarPlus className="w-4 h-4" /> Add to Calendar
-                  </button>
+                   }} className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20"><CalendarPlus className="w-4 h-4" /> Add to Calendar</button>
                  </div>
               </div>
             </div>
@@ -561,19 +491,12 @@ const EventDetailPage = ({ event, onBack, isFavorite, onToggleFavorite, events =
              <h2 className="text-3xl font-black text-white mb-10 uppercase tracking-tight">YOU MIGHT ALSO LIKE</h2>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {relatedEvents.map((re, idx) => (
-                 <EventCard 
-                   key={re.id || idx}
-                   event={re}
-                   onClick={() => onNavigate('event-detail', re)}
-                   isFavorite={false} 
-                   onToggleFavorite={() => {}}
-                 />
+                 <EventCard key={re.id || idx} event={re} onClick={() => onNavigate('event-detail', re)} isFavorite={false} onToggleFavorite={() => {}} />
                ))}
              </div>
            </ScrollReveal>
          </div>
       )}
-
     </div>
   );
 };
@@ -609,8 +532,16 @@ const ContactSection = () => {
                 <span className="text-fuchsia-400 font-bold tracking-widest uppercase text-sm">Get in Touch</span>
               </div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight">LET'S MAKE <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-orange-400 uppercase">MAGIC HAPPEN</span></h2>
+              <p className="text-slate-400 mb-10 text-xl leading-relaxed">Got a crazy idea for an event? Want to partner with the best? Or just want to say hi? We're listening.</p>
               <div className="space-y-6">
-                <div className="group flex items-center gap-6 text-slate-300 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10"><div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-fuchsia-600/20 transition-all"><Mail className="w-7 h-7" /></div><div><p className="text-sm text-slate-500 font-bold uppercase mb-1">Email Us</p><p className="text-xl font-bold text-white group-hover:text-fuchsia-300">hello@eventsinserbia.rs</p></div></div>
+                <div className="group flex items-center gap-6 text-slate-300 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                  <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-fuchsia-600/20 group-hover:text-fuchsia-400 transition-all"><Mail className="w-7 h-7" /></div>
+                  <div><p className="text-sm text-slate-500 font-bold uppercase mb-1">Email Us</p><p className="text-xl font-bold text-white group-hover:text-fuchsia-300 transition-colors">hello@eventsinserbia.rs</p></div>
+                </div>
+                <div className="group flex items-center gap-6 text-slate-300 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                  <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-fuchsia-600/20 group-hover:text-fuchsia-400 transition-all"><MapPin className="w-7 h-7" /></div>
+                  <div><p className="text-sm text-slate-500 font-bold uppercase mb-1">HQ</p><p className="text-xl font-bold text-white group-hover:text-fuchsia-300 transition-colors">100 Future Way, Tech City</p></div>
+                </div>
               </div>
             </div>
           </ScrollReveal>
@@ -620,11 +551,11 @@ const ContactSection = () => {
               <form className="relative bg-black/80 backdrop-blur-xl p-10 rounded-3xl border border-white/10 shadow-2xl" onSubmit={handleSubmit}>
                 <h3 className="text-2xl font-bold text-white mb-8">Send a Message</h3>
                 <div className="space-y-6">
-                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Your Name</label><input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 transition-all" /></div>
-                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Email</label><input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 transition-all" /></div>
-                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2">Message</label><textarea rows="4" name="message" value={formData.message} onChange={handleChange} required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 transition-all" /></div>
-                  <button disabled={status === 'sending'} className={`w-full py-5 rounded-xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 ${status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : 'bg-gradient-to-r from-violet-600 to-fuchsia-600'}`}>
-                    {status === 'sending' ? <Loader2 className="animate-spin" /> : status === 'success' ? <>Sent!</> : status === 'error' ? <>Failed</> : <>Send Message <Send className="w-5 h-5" /></>}
+                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2 tracking-wider">Your Name</label><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Cyber Punk" required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-all placeholder:text-slate-600 font-medium" /></div>
+                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2 tracking-wider">Email Address</label><input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="punk@future.com" required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-all placeholder:text-slate-600 font-medium" /></div>
+                  <div><label className="block text-xs font-bold text-fuchsia-400 uppercase mb-2 tracking-wider">Message</label><textarea rows="4" name="message" value={formData.message} onChange={handleChange} placeholder="Let's build the future..." required className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-all resize-none placeholder:text-slate-600 font-medium" /></div>
+                  <button disabled={status === 'sending'} className={`w-full py-5 rounded-xl text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(192,38,211,0.4)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group ${status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : 'bg-gradient-to-r from-violet-600 to-fuchsia-600'}`}>
+                    {status === 'sending' ? <Loader2 className="w-5 h-5 animate-spin" /> : status === 'success' ? <>Sent! <CheckCircle className="w-5 h-5" /></> : status === 'error' ? <>Failed <AlertCircle className="w-5 h-5" /></> : <>Send It <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>}
                   </button>
                 </div>
               </form>
@@ -636,19 +567,52 @@ const ContactSection = () => {
   );
 };
 
-const Footer = ({ onNavigate }) => (
-  <footer className="bg-black border-t border-white/10 pt-24 pb-12 relative overflow-hidden">
-    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] bg-fuchsia-900/20 blur-[120px] pointer-events-none" />
-    <div className="container mx-auto px-6 relative z-10">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
-        <div className="md:col-span-5"><div className="flex items-center gap-3 mb-8 cursor-pointer group" onClick={() => onNavigate('home')}><div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center group-hover:bg-fuchsia-400 transition-colors"><Zap className="text-black w-6 h-6" /></div><span className="text-3xl font-black text-white tracking-tighter uppercase">LUMINA</span></div><p className="text-slate-400 text-lg max-w-md leading-relaxed mb-8">Curating defining moments in Serbia's vibrant landscape.</p></div>
-        <div className="md:col-span-2 md:col-start-7"><h4 className="text-white font-bold mb-8 uppercase text-sm">Discover</h4><ul className="space-y-4 text-slate-400"><li><span onClick={() => onNavigate('events')} className="hover:text-fuchsia-400 cursor-pointer">All Events</span></li><li><span className="hover:text-fuchsia-400 cursor-pointer">Concerts</span></li><li><span className="hover:text-fuchsia-400 cursor-pointer">Festivals</span></li></ul></div>
-        <div className="md:col-span-2"><h4 className="text-white font-bold mb-8 uppercase text-sm">Company</h4><ul className="space-y-4 text-slate-400"><li><span>About Us</span></li><li><span onClick={() => onNavigate('contact')} className="hover:text-fuchsia-400 cursor-pointer">Contact</span></li></ul></div>
+const Footer = ({ onNavigate }) => {
+  return (
+    <footer className="bg-black border-t border-white/10 pt-24 pb-12 relative overflow-hidden">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] bg-fuchsia-900/20 blur-[120px] pointer-events-none" />
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3 mb-8 cursor-pointer group" onClick={() => onNavigate('home')}>
+               <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center group-hover:bg-fuchsia-400 transition-colors duration-300"><Zap className="text-black w-6 h-6" /></div>
+              <span className="text-3xl font-black text-white tracking-tighter uppercase">LUMINA</span>
+            </div>
+            <p className="text-slate-400 text-lg max-w-md leading-relaxed mb-8">We don't just host events. We curate moments that define a generation. Join the movement.</p>
+            <div className="flex gap-4">
+               {['Twitter', 'Instagram', 'LinkedIn'].map((s) => (<div key={s} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all cursor-pointer"><span className="text-xs">{s[0]}</span></div>))}
+            </div>
+          </div>
+          <div className="md:col-span-2 md:col-start-7">
+            <h4 className="text-white font-bold mb-8 uppercase tracking-wider text-sm">Discover</h4>
+            <ul className="space-y-4 text-slate-400">
+              <li><span onClick={() => onNavigate('events')} className="hover:text-fuchsia-400 transition-colors cursor-pointer block">All Events</span></li>
+              <li><span className="hover:text-fuchsia-400 transition-colors cursor-pointer block">Concerts</span></li>
+              <li><span className="hover:text-fuchsia-400 transition-colors cursor-pointer block">Festivals</span></li>
+            </ul>
+          </div>
+          <div className="md:col-span-2">
+            <h4 className="text-white font-bold mb-8 uppercase tracking-wider text-sm">Company</h4>
+            <ul className="space-y-4 text-slate-400">
+              <li><span className="hover:text-fuchsia-400 transition-colors cursor-pointer block">About Us</span></li>
+              <li><span onClick={() => onNavigate('contact')} className="hover:text-fuchsia-400 transition-colors cursor-pointer block">Contact</span></li>
+            </ul>
+          </div>
+          <div className="md:col-span-2">
+            <h4 className="text-white font-bold mb-8 uppercase tracking-wider text-sm">Legal</h4>
+            <ul className="space-y-4 text-slate-400">
+              <li><span className="hover:text-fuchsia-400 transition-colors cursor-pointer block">Privacy</span></li>
+              <li><span className="hover:text-fuchsia-400 transition-colors cursor-pointer block">Terms</span></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-slate-600 text-sm">© 2024 Events in Serbia. All rights reserved.</p>
+        </div>
       </div>
-      <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4"><p className="text-slate-600 text-sm">© 2024 Events in Serbia. All rights reserved.</p></div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home'); 
@@ -696,32 +660,36 @@ export default function App() {
   };
 
   useEffect(() => {
-    const handleHash = () => {
-      const h = window.location.hash;
-      if (h.startsWith('#event-')) {
-        const id = h.replace('#event-', '');
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#event-')) {
+        const id = hash.replace('#event-', '');
         const ev = events.find(e => e.id === id);
         if (ev) {
           setSelectedEvent(ev);
           setCurrentPage('event-detail');
         }
-      } else if (h === '#events') {
+      } else if (hash === '#events') {
         setCurrentPage('events');
-      } else if (h === '#contact') {
+      } else if (hash === '#contact') {
         setCurrentPage('contact');
       } else {
         setCurrentPage('home');
       }
     };
-    if (!isLoadingEvents) handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    if (!isLoadingEvents) {
+      handleHashChange();
+    }
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [isLoadingEvents, events]);
 
   useEffect(() => {
-    const authInit = async () => { await signInAnonymously(auth); };
-    authInit();
-    const unsubscribeAuth = onAuthStateChanged(auth, u => setUser(u));
+    const initAuth = async () => { await signInAnonymously(auth); };
+    initAuth();
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => { setUser(currentUser); });
     return () => unsubscribeAuth();
   }, []);
 
@@ -742,9 +710,9 @@ export default function App() {
   }, [user]);
 
   useEffect(() => {
-    const scroll = () => setIsScrolled(window.scrollY > 150);
-    window.addEventListener('scroll', scroll);
-    return () => window.removeEventListener('scroll', scroll);
+    const handleScroll = () => { setIsScrolled(window.scrollY > 150); };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const cityData = useMemo(() => {
@@ -776,42 +744,37 @@ export default function App() {
     });
   }, [events, selectedCategory, selectedCity, searchQuery, showFavoritesOnly, favorites]);
 
-  return (
-    <div className="min-h-screen bg-black font-sans selection:bg-fuchsia-500 selection:text-white text-slate-200">
-      <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
-      <main>
-        {currentPage === 'home' && (<>
-          <Hero onNavigate={handleNavigate} />
-          <section className="py-32 container mx-auto px-6 bg-black relative">
-            <ScrollReveal>
-              <div className="flex items-end justify-between mb-16">
-                <div>
-                  <h2 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase">TRENDING <span className="text-fuchsia-500">NOW</span></h2>
-                  <p className="text-slate-400 text-lg">Don't miss out on the season's hottest tickets.</p>
+  const renderContent = () => {
+    switch (currentPage) {
+      case 'home':
+        return (
+          <>
+            <Hero onNavigate={handleNavigate} />
+            <section className="py-32 container mx-auto px-6 bg-black relative">
+              <ScrollReveal>
+                <div className="flex items-end justify-between mb-16">
+                  <div><h2 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter">TRENDING <span className="text-fuchsia-500">NOW</span></h2><p className="text-slate-400 text-lg">Top picks for the upcoming season.</p></div>
+                  <button onClick={() => handleNavigate('events')} className="hidden md:flex items-center gap-2 text-white font-bold hover:text-fuchsia-400 transition-colors text-lg group">View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></button>
                 </div>
-                <button onClick={() => handleNavigate('events')} className="hidden md:flex items-center gap-2 text-white font-bold hover:text-fuchsia-400 transition-colors text-lg group">
-                  View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </ScrollReveal>
-            {isLoadingEvents ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-fuchsia-500 animate-spin" /></div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
-                {events.filter(e => e.featured).slice(0, 3).map((event, index) => (
-                  <ScrollReveal key={event.id} delay={index * 50} className="h-full">
-                     <EventCard event={event} onClick={(e) => handleNavigate('event-detail', e)} isFavorite={favorites.includes(event.id)} onToggleFavorite={toggleFavorite} />
-                  </ScrollReveal>
-                ))}
-              </div>
-            )}
-          </section>
-          <ContactSection />
-        </>)}
-        {currentPage === 'events' && (
+              </ScrollReveal>
+              {isLoadingEvents ? (
+                <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-fuchsia-500 animate-spin" /></div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
+                  {events.filter(e => e.featured).slice(0, 3).map((e, i) => (
+                    <ScrollReveal key={e.id} delay={i * 50} className="h-full"><EventCard event={e} onClick={(ev) => handleNavigate('event-detail', ev)} isFavorite={favorites.includes(e.id)} onToggleFavorite={toggleFavorite} /></ScrollReveal>
+                  ))}
+                </div>
+              )}
+            </section>
+            <ContactSection />
+          </>
+        );
+      case 'events':
+        return (
           <div className="pt-32 pb-24 container mx-auto px-6 min-h-screen bg-black">
             <ScrollReveal>
-              <h1 className="text-5xl md:text-7xl font-black text-white mb-8 uppercase tracking-tighter">ALL <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">EVENTS</span></h1>
+              <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase">ALL <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">EVENTS</span></h1>
             </ScrollReveal>
             <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="relative flex-grow">
@@ -834,10 +797,23 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">{filteredEvents.map((event, index) => (<ScrollReveal key={event.id} delay={index * 50} className="h-full"><EventCard event={event} onClick={(e) => handleNavigate('event-detail', e)} isFavorite={favorites.includes(event.id)} onToggleFavorite={toggleFavorite} /></ScrollReveal>))}</div>
             )}
           </div>
-        )}
-        {currentPage === 'event-detail' && <EventDetailPage event={selectedEvent} onBack={() => handleNavigate('events')} isFavorite={favorites.includes(selectedEvent.id)} onToggleFavorite={toggleFavorite} events={events} onNavigate={handleNavigate} />}
-        {currentPage === 'contact' && <div className="pt-20"><ContactSection /></div>}
-      </main>
+        );
+
+      case 'event-detail':
+        return (<EventDetailPage event={selectedEvent} onBack={() => handleNavigate('events')} isFavorite={favorites.includes(selectedEvent.id)} onToggleFavorite={toggleFavorite} events={events} onNavigate={handleNavigate} />);
+
+      case 'contact':
+        return (<div className="pt-20 bg-black min-h-screen"><ContactSection /></div>);
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black font-sans selection:bg-fuchsia-500 selection:text-white text-slate-200">
+      <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
+      <main>{renderContent()}</main>
       <Footer onNavigate={handleNavigate} />
       <style>{`
         html, body { background-color: #000; margin: 0; padding: 0; }
